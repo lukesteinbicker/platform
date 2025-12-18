@@ -1,0 +1,27 @@
+{
+  "name": "@repo/database",
+  "version": "0.0.0",
+  "main": "./index.ts",
+  "types": "./index.ts",
+  "scripts": {
+    "clean": "git clean -xdf .cache .turbo dist node_modules",
+    "migrate:dev": "tsx migrations/run.ts dev",
+    "migrate:prod": "tsx migrations/run.ts prod",
+    "typecheck": "tsc --noEmit --emitDeclarationOnly false"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "^1.0.2",
+    "dotenv": "^17.2.3",
+    "kysely": "^0.27.3",
+    "server-only": "^0.0.1",
+    "ws": "^8.18.3",
+    "zod": "^4.1.13"
+  },
+  "devDependencies": {
+    "@repo/typescript-config": "workspace:*",
+    "@types/node": "24.10.1",
+    "@types/ws": "^8.18.1",
+    "tsx": "^4.19.2",
+    "typescript": "^5.9.3"
+  }
+}
