@@ -1,7 +1,6 @@
 "use client";
 
-import { useListContext, ListBase as RaList } from "ra-core";
-import { useRouter } from "next/navigation";
+import { useListContext, ListBase as RaList, useRedirect } from "ra-core";
 import {
   Table,
   TableBody,
@@ -19,7 +18,7 @@ import { useState } from "react";
 
 const UserListInner = () => {
   const { data, isPending } = useListContext();
-  const router = useRouter();
+  const redirect = useRedirect();
   const [searchValue, setSearchValue] = useState("");
 
   if (isPending) {
@@ -43,7 +42,7 @@ const UserListInner = () => {
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle>Users</CardTitle>
-          <Button onClick={() => router.push("/users/create")}>
+          <Button onClick={() => redirect("create", "users")}>
             <PlusIcon className="size-4" />
             Create User
           </Button>
@@ -118,7 +117,7 @@ const UserListInner = () => {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => router.push(`/users/${user.id}`)}
+                      onClick={() => redirect("edit", "users", user.id)}
                     >
                       Edit
                     </Button>

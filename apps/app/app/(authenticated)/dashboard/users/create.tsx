@@ -70,7 +70,7 @@ const UserCreateInner = () => {
       {
         onSuccess: () => {
           notify("User created successfully", { type: "success" });
-          redirect("/users");
+          redirect("list", "users");
         },
         onError: () => {
           notify("Failed to create user", { type: "error" });
@@ -86,7 +86,7 @@ const UserCreateInner = () => {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => redirect("/users")}
+            onClick={() => redirect("list", "users")}
           >
             <ArrowLeftIcon className="size-4" />
           </Button>
@@ -169,7 +169,7 @@ const UserCreateInner = () => {
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => redirect("/users")}
+                onClick={() => redirect("list", "users")}
               >
                 Cancel
               </Button>

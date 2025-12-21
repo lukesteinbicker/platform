@@ -74,7 +74,7 @@ const UserEditInner = () => {
       {
         onSuccess: () => {
           notify("User updated successfully", { type: "success" });
-          redirect("/users");
+          redirect("list", "users");
         },
         onError: () => {
           notify("Failed to update user", { type: "error" });
