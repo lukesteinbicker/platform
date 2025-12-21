@@ -5,6 +5,7 @@ export interface Database {
   session: SessionTable;
   account: AccountTable;
   verification: VerificationTable;
+  audit_log: AuditLogTable;
 }
 
 export interface UserTable {
@@ -12,49 +13,52 @@ export interface UserTable {
   name: string;
   username: string | null;
   email: string;
-  email_verified: boolean;
+  emailVerified: boolean;
   image: string | null;
   role: "admin" | "user" | null;
-  company_id: string | null;
+  companyId: string | null;
   communications: boolean | null;
-  created_at: Generated<Date>;
-  updated_at: Generated<Date>;
+  banned: boolean;
+  banReason: string | null;
+  banExpires: Date | null;
+  createdAt: Generated<Date>;
+  updatedAt: Generated<Date>;
 }
 
 export interface SessionTable {
   id: Generated<string>;
-  user_id: string;
+  userId: string;
   token: string;
-  expires_at: Date;
-  ip_address: string | null;
-  user_agent: string | null;
-  created_at: Generated<Date>;
-  updated_at: Generated<Date>;
+  expiresAt: Date;
+  ipAddress: string | null;
+  userAgent: string | null;
+  createdAt: Generated<Date>;
+  updatedAt: Generated<Date>;
 }
 
 export interface AccountTable {
   id: Generated<string>;
-  user_id: string;
-  account_id: string;
-  provider_id: string;
-  access_token: string | null;
-  refresh_token: string | null;
-  access_token_expires_at: Date | null;
-  refresh_token_expires_at: Date | null;
+  userId: string;
+  accountId: string;
+  providerId: string;
+  accessToken: string | null;
+  refreshToken: string | null;
+  accessTokenExpiresAt: Date | null;
+  refreshTokenExpiresAt: Date | null;
   scope: string | null;
-  id_token: string | null;
+  idToken: string | null;
   password: string | null;
-  created_at: Generated<Date>;
-  updated_at: Generated<Date>;
+  createdAt: Generated<Date>;
+  updatedAt: Generated<Date>;
 }
 
 export interface VerificationTable {
   id: Generated<string>;
   identifier: string;
   value: string;
-  expires_at: Date;
-  created_at: Generated<Date>;
-  updated_at: Generated<Date>;
+  expiresAt: Date;
+  createdAt: Generated<Date>;
+  updatedAt: Generated<Date>;
 }
 
 export type User = Selectable<UserTable>;
@@ -69,6 +73,25 @@ export type Account = Selectable<AccountTable>;
 export type NewAccount = Insertable<AccountTable>;
 export type AccountUpdate = Updateable<AccountTable>;
 
+export interface AuditLogTable {
+  id: Generated<string>;
+  userId: string;
+  action: string;
+  resourceType: string | null;
+  resourceId: string | null;
+  details: Record<string, unknown> | null;
+  ipAddress: string | null;
+  userAgent: string | null;
+  sessionId: string | null;
+  success: boolean;
+  errorMessage: string | null;
+  createdAt: Generated<Date>;
+}
+
 export type Verification = Selectable<VerificationTable>;
 export type NewVerification = Insertable<VerificationTable>;
 export type VerificationUpdate = Updateable<VerificationTable>;
+
+export type AuditLog = Selectable<AuditLogTable>;
+export type NewAuditLog = Insertable<AuditLogTable>;
+export type AuditLogUpdate = Updateable<AuditLogTable>;

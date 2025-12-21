@@ -2,6 +2,7 @@ import "server-only";
 
 import { pool } from "@repo/database";
 import { betterAuth } from "better-auth";
+import { admin } from "better-auth/plugins";
 import { nextCookies } from "better-auth/next-js";
 import { headers } from "next/headers";
 import { sendVerificationEmail, sendPasswordResetEmail } from "@repo/email";
@@ -32,7 +33,7 @@ export const auth = betterAuth({
     sendOnSignUp: true,
     autoSignInAfterVerification: true,
   },
-  plugins: [nextCookies()],
+  plugins: [nextCookies(), admin()],
 });
 
 export const currentUser = async () => {

@@ -34,6 +34,7 @@ Platform comes with a comprehensive set of features:
 - **Email** — Transactional emails via [Resend](https://resend.com)
 - **Analytics** — Product analytics with [PostHog](https://posthog.com) and web analytics with [Google Analytics](https://developers.google.com/analytics)
 - **Observability** — Error tracking and logging via PostHog
+- **Administration** — Admin dashboard with ra-core
 - **SEO** — Metadata management, sitemaps, and JSON-LD
 - **AI** — AI integration utilities with OpenAI
 

@@ -5,8 +5,14 @@
   "types": "./index.ts",
   "scripts": {
     "clean": "git clean -xdf .cache .turbo dist node_modules",
-    "migrate:dev": "tsx migrations/run.ts dev",
-    "migrate:prod": "tsx migrations/run.ts prod",
+    "migrate:dev": "tsx migrations/run.ts dev up",
+    "migrate:dev:up": "tsx migrations/run.ts dev up",
+    "migrate:dev:down": "tsx migrations/run.ts dev down",
+    "migrate:dev:status": "tsx migrations/run.ts dev status",
+    "migrate:prod": "tsx migrations/run.ts prod up",
+    "migrate:prod:up": "tsx migrations/run.ts prod up",
+    "migrate:prod:down": "tsx migrations/run.ts prod down",
+    "migrate:prod:status": "tsx migrations/run.ts prod status",
     "typecheck": "tsc --noEmit --emitDeclarationOnly false"
   },
   "dependencies": {

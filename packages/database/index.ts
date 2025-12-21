@@ -65,14 +65,47 @@ const createDb = (url?: string) => {
   });
 };
 
-export const database: Kysely<Database> = global.__db__ ?? createDb();
+// Lazy initialization to avoid errors when importing in migration scripts
+// Check if we're running migrations (migration scripts use createDb directly)
+const isMigrationScript = typeof process !== "undefined" && 
+  process.argv.some((arg) => arg.includes("migrations/run.ts"));
 
-if (process.env.NODE_ENV !== "production") {
-  global.__db__ = database;
+// Only initialize database/pool if we have the required URL and aren't in a migration script
+// Migration scripts use createDb() directly with admin URLs
+const shouldInitialize = !isMigrationScript && getDatabaseUrl();
+
+let _database: Kysely<Database> | undefined;
+export const database: Kysely<Database> = shouldInitialize
+  ? (global.__db__ ?? createDb())
+  : (new Proxy({} as Kysely<Database>, {
+      get(_target, prop) {
+        if (!_database) {
+          _database = global.__db__ ?? createDb();
+          if (process.env.NODE_ENV !== "production") {
+            global.__db__ = _database;
+          }
+        }
+        return (_database as any)[prop];
+      },
+    }) as Kysely<Database>);
+
+if (shouldInitialize && process.env.NODE_ENV !== "production") {
+  global.__db__ = database as Kysely<Database>;
 }
 
 // Export pool for BetterAuth (reuses the same pool as Kysely)
-export const pool = getOrCreatePool();
+// Lazy initialization to avoid errors when importing in migration scripts
+let _pool: Pool | undefined;
+export const pool: Pool = shouldInitialize
+  ? getOrCreatePool()
+  : (new Proxy({} as Pool, {
+      get(_target, prop) {
+        if (!_pool) {
+          _pool = getOrCreatePool();
+        }
+        return (_pool as any)[prop];
+      },
+    }) as Pool);
 
 export { createDb };
 export * from "./schema";

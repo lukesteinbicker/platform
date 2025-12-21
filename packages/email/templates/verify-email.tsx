@@ -5,7 +5,6 @@ import {
   Head,
   Heading,
   Html,
-  Link,
   Preview,
   Section,
   Text,
@@ -22,25 +21,25 @@ export const VerifyEmail = ({ name, verificationUrl }: VerifyEmailProps) => (
     <Preview>Verify your email address</Preview>
     <Body style={main}>
       <Container style={container}>
-        <Heading style={h1}>Verify your email address</Heading>
-        <Text style={text}>Hi {name},</Text>
-        <Text style={text}>
-          Thanks for signing up! Please verify your email address by clicking the button below:
-        </Text>
+        <Section style={headerSection}>
+          <Heading style={h1}>Verify your email address</Heading>
+        </Section>
+        <Section style={contentSection}>
+          <Text style={greeting}>Hi {name},</Text>
+          <Text style={text}>
+            Thanks for signing up! Please verify your email address by clicking the button below:
+          </Text>
+        </Section>
         <Section style={buttonContainer}>
           <Button style={button} href={verificationUrl}>
             Verify Email
           </Button>
         </Section>
-        <Text style={text}>
-          Or copy and paste this URL into your browser:
-        </Text>
-        <Link href={verificationUrl} style={link}>
-          {verificationUrl}
-        </Link>
-        <Text style={footer}>
-          If you didn't create an account, you can safely ignore this email.
-        </Text>
+        <Section style={footerSection}>
+          <Text style={footer}>
+            If you didn't create an account, you can safely ignore this email.
+          </Text>
+        </Section>
       </Container>
     </Body>
   </Html>
@@ -49,7 +48,7 @@ export const VerifyEmail = ({ name, verificationUrl }: VerifyEmailProps) => (
 export default VerifyEmail;
 
 const main = {
-  backgroundColor: "#f6f9fc",
+  backgroundColor: "#f5f7fa",
   fontFamily:
     '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Ubuntu,sans-serif',
 };
@@ -57,57 +56,81 @@ const main = {
 const container = {
   backgroundColor: "#ffffff",
   margin: "0 auto",
-  padding: "20px 0 48px",
+  padding: "0",
   marginBottom: "64px",
+  borderRadius: "12px",
+  boxShadow: "0 4px 6px rgba(0, 0, 0, 0.05)",
+  maxWidth: "600px",
+  overflow: "hidden",
 };
 
-const h1 = {
-  color: "#333",
-  fontSize: "24px",
-  fontWeight: "bold",
-  margin: "40px 0",
-  padding: "0",
+const headerSection = {
+  backgroundColor: "#1a1a1a",
+  padding: "40px 48px",
   textAlign: "center" as const,
 };
 
+const h1 = {
+  color: "#ffffff",
+  fontSize: "28px",
+  fontWeight: "600",
+  margin: "0",
+  padding: "0",
+  textAlign: "center" as const,
+  letterSpacing: "-0.5px",
+};
+
+const contentSection = {
+  padding: "48px 48px 32px",
+};
+
+const greeting = {
+  color: "#1a1a1a",
+  fontSize: "18px",
+  lineHeight: "28px",
+  margin: "0 0 24px",
+  padding: "0",
+  fontWeight: "500",
+};
+
 const text = {
-  color: "#333",
+  color: "#4a5568",
   fontSize: "16px",
   lineHeight: "26px",
-  margin: "16px 0",
-  padding: "0 48px",
+  margin: "0 0 32px",
+  padding: "0",
 };
 
 const buttonContainer = {
-  padding: "27px 0 27px",
+  padding: "0 48px 48px",
   textAlign: "center" as const,
 };
 
 const button = {
-  backgroundColor: "#000",
+  backgroundColor: "#1a1a1a",
   borderRadius: "8px",
-  color: "#fff",
+  color: "#ffffff",
   fontSize: "16px",
+  fontWeight: "600",
   textDecoration: "none",
   textAlign: "center" as const,
-  display: "block",
-  padding: "12px 24px",
+  display: "inline-block",
+  padding: "14px 32px",
   margin: "0 auto",
+  transition: "background-color 0.2s",
 };
 
-const link = {
-  color: "#0066cc",
-  fontSize: "14px",
-  textDecoration: "underline",
-  wordBreak: "break-all" as const,
-  padding: "0 48px",
-  display: "block",
+const footerSection = {
+  backgroundColor: "#f9fafb",
+  padding: "32px 48px",
+  borderTop: "1px solid #e5e7eb",
 };
 
 const footer = {
-  color: "#8898aa",
+  color: "#6b7280",
   fontSize: "14px",
-  lineHeight: "24px",
-  margin: "32px 0",
-  padding: "0 48px",
+  lineHeight: "22px",
+  margin: "0",
+  padding: "0",
+  textAlign: "center" as const,
 };
