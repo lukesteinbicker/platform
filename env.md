@@ -1,80 +1,159 @@
 # Environment Variables
 
-**All environment variables are configured in a single `.env.local` file at the root of the monorepo.**
+**Environment variables are configured per-application using `.env.local` files in each app directory.**
 
-This file is automatically loaded by all Next.js apps (app, web, api) when running from the monorepo root.
+This follows [Turborepo best practices](https://turborepo.ai/docs/crafting-your-repository/using-environment-variables) for monorepo environment variable management.
 
 ## Setup
 
-1. Copy `.env.local.example` to `.env.local` at the root:
-   ```bash
-   cp .env.local.example .env.local
-   ```
+Each application has its own `.env.local` file that is automatically loaded by Next.js:
 
-2. Fill in your environment variables in `.env.local`
+### App (Main Application)
 
-3. The `.env.local` file is already in `.gitignore` and will not be committed to git.
+```bash
+cd apps/app
+cp .env.local.example .env.local
+# Edit .env.local with your values
+```
 
-## Environment Variables
+### Web (Marketing Site)
 
-# DO NOT PUSH YOUR ACTUAL .ENV FILE #
+```bash
+cd apps/web
+cp .env.local.example .env.local
+# Edit .env.local with your values
+```
 
-# ============================================
-# CORE
-# ============================================
+### API (API Server)
+
+```bash
+cd apps/api
+cp .env.local.example .env.local
+# Edit .env.local with your values
+```
+
+**Note:** All `.env.local` files are in `.gitignore` and will not be committed to git.
+
+## Environment Variables by Application
+
+### App (apps/app/.env.local)
+
+The main authenticated application:
+
+```bash
+# Core
+
+ANALYZE=
+NEXT_RUNTIME=
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+NEXT_PUBLIC_WEB_URL=http://localhost:3001
+
+# Database
+DATABASE_URL_DEV=postgresql://user:password@host:5432/dbname
+DATABASE_URL_PROD=
+
+# Authentication (Better Auth)
+# Generate with: npx @better-auth/cli secret
+BETTER_AUTH_SECRET=
+
+# Email (Resend)
+RESEND_TOKEN=
+RESEND_FROM=noreply@example.com
+
+# Analytics
+NEXT_PUBLIC_POSTHOG_KEY=
+NEXT_PUBLIC_POSTHOG_HOST=https://app.posthog.com
+NEXT_PUBLIC_GA_MEASUREMENT_ID=
+
+# Notifications (Knock)
+NEXT_PUBLIC_KNOCK_API_KEY=
+NEXT_PUBLIC_KNOCK_FEED_CHANNEL_ID=
+
+# AI (OpenAI)
+OPENAI_API_KEY=
+```
+
+### Web (apps/web/.env.local)
+
+The marketing website needs fewer variables:
+
+```bash
+# Core
+
 ANALYZE=
 NEXT_RUNTIME=
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 NEXT_PUBLIC_WEB_URL=http://localhost:3001
 NEXT_PUBLIC_API_URL=http://localhost:3002
 
+# Email (for contact form)
+RESEND_TOKEN=
+RESEND_FROM=noreply@example.com
+
+# Analytics
+NEXT_PUBLIC_POSTHOG_KEY=
+NEXT_PUBLIC_POSTHOG_HOST=https://app.posthog.com
+NEXT_PUBLIC_GA_MEASUREMENT_ID=
+```
+
+### API (apps/api/.env.local)
+
+The API server needs database and webhook access:
+
+```bash
+# Core
+
+ANALYZE=
+NEXT_RUNTIME=
+
 # Database
-
-# Development database (used by app)
-DATABASE_URL_DEV=
-
-# Production database (used by app)
+DATABASE_URL_DEV=postgresql://user:password@host:5432/dbname
 DATABASE_URL_PROD=
 
-# Development database admin (used for migrations: pnpm run migrate:dev)
-DATABASE_URL_DEV_ADMIN=
+# Webhooks (Svix)
+SVIX_TOKEN=
+```
 
-# Production database admin (used for migrations: pnpm run migrate:prod)
-DATABASE_URL_PROD_ADMIN=
+## Database Migrations
 
-# Authentication (Better Auth)
-# Generate with npx @better-auth/cli secret
-BETTER_AUTH_SECRET=
+Database migrations use separate admin connection strings that should be configured in your root `.env.local` file (this is an exception to the per-app pattern):
 
-# Email (Resend)
-RESEND_TOKEN=
-RESEND_FROM=
+```bash
+# Root .env.local (for migrations only)
+DATABASE_URL_DEV_ADMIN=postgresql://admin:password@host:5432/dbname
+DATABASE_URL_PROD_ADMIN=postgresql://admin:password@host:5432/dbname
+```
 
+Run migrations with:
+- `pnpm migrate:dev` - Development database
+- `pnpm migrate:prod` - Production database
 
-# Analytics (Posthog)
-NEXT_PUBLIC_POSTHOG_KEY=
-NEXT_PUBLIC_POSTHOG_HOST=
-NEXT_PUBLIC_GA_MEASUREMENT_ID=
+## Additional Services (Optional)
 
-# ============================================
-# ADDITIONAL SERVICES
-# ============================================
+Some packages support additional services that can be configured if needed:
 
-# Payments (Polar)
+```bash
+# Payments (Polar) - Add to apps/app/.env.local if using
 POLAR_ACCESS_TOKEN=
 POLAR_WEBHOOK_SECRET=
 POLAR_SERVER=
 
-# Webhooks (Svix)
-SVIX_TOKEN=
-
-# Notifications (Knock)
-KNOCK_SECRET_API_KEY=
-NEXT_PUBLIC_KNOCK_API_KEY=
-NEXT_PUBLIC_KNOCK_FEED_CHANNEL_ID=
-
-# Internationalization (Languine)
+# Internationalization (Languine) - Add to apps that need i18n
 LANGUINE_PROJECT_ID=
 
-# AI (OpenAI)
-OPENAI_API_KEY=
+# Notifications (Knock) - Add secret key to apps/app/.env.local if using server-side
+KNOCK_SECRET_API_KEY=
+```
+
+## Turborepo Configuration
+
+Environment variables are configured in `turbo.json` to ensure proper cache invalidation. The configuration uses:
+
+- **Strict Mode** (default) - Only variables listed in `env` keys are available at runtime
+- **Per-task env keys** - Each task declares which variables it needs
+- **Wildcard support** - Use `DATABASE_URL_*` to match multiple variables
+
+This ensures that:
+- Cache is invalidated when relevant variables change
+- Unrelated variable changes don't invalidate cache unnecessarily
+- Missing variables cause build failures (preventing misconfiguration)

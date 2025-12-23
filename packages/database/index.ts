@@ -4,33 +4,14 @@ if (typeof process !== "undefined" && process.env.NEXT_RUNTIME) {
   require("server-only");
 }
 
-import { neonConfig, Pool } from "@neondatabase/serverless";
-import { Kysely, PostgresDialect } from "kysely";
-import * as ws from "ws";
+import { neon, neonConfig, Pool } from "@neondatabase/serverless";
+import { Kysely } from "kysely";
+import { NeonDialect } from "kysely-neon";
 import type { Database } from "./schema";
 
-// Environment variables are loaded by Turborepo's globalEnv config
-// No need for manual dotenv loading in Next.js context
-
-// Configure Neon to use WebSocket in Node.js environments
-if (typeof window === "undefined") {
-  neonConfig.webSocketConstructor = ws.WebSocket;
-}
-
-// Required for PlanetScale Postgres (SCRAM-SHA-256 authentication)
-// Also safe to set for regular Neon connections
-neonConfig.pipelineConnect = false;
-
-// Required for PlanetScale Postgres proxy connections
-
-neonConfig.wsProxy = (host, port) => `${host}/v2?address=${host}:${port}`;
-
-declare global {
-  // eslint-disable-next-line no-var
-  var __db__: Kysely<Database> | undefined;
-  // eslint-disable-next-line no-var
-  var __dbPool__: Pool | undefined;
-}
+// Configure PlanetScale HTTP mode (instead of WebSockets)
+// https://planetscale.com/changelog/neon-serverless-driver-http-mode
+neonConfig.fetchEndpoint = (host) => `https://${host}/sql`;
 
 // Get database URL based on environment
 const getDatabaseUrl = (env?: "dev" | "prod") => {
@@ -40,72 +21,33 @@ const getDatabaseUrl = (env?: "dev" | "prod") => {
   return process.env.DATABASE_URL_DEV;
 };
 
-// Create or get cached pool instance
-const getOrCreatePool = (url?: string) => {
-  const connectionString = url || getDatabaseUrl();
-  
-  if (!connectionString) {
-    throw new Error(`Database URL is not defined. Please set DATABASE_URL_${process.env.NODE_ENV === "production" ? "PROD" : "DEV"}`);
-  }
-
-  if (!global.__dbPool__) {
-    global.__dbPool__ = new Pool({ connectionString });
-  }
-
-  return global.__dbPool__;
-};
-
+// Create database instance with HTTP mode (no WebSockets)
 const createDb = (url?: string) => {
-  const pool = getOrCreatePool(url);
+  const connectionString = url || getDatabaseUrl();
+
+  if (!connectionString) {
+    throw new Error(
+      `Database URL is not defined. Please set DATABASE_URL_${
+        process.env.NODE_ENV === "production" ? "PROD" : "DEV"
+      }`
+    );
+  }
 
   return new Kysely<Database>({
-    dialect: new PostgresDialect({
-      pool,
+    dialect: new NeonDialect({
+      neon: neon(connectionString),
     }),
   });
 };
 
-// Lazy initialization to avoid errors when importing in migration scripts
-// Check if we're running migrations (migration scripts use createDb directly)
-const isMigrationScript = typeof process !== "undefined" && 
-  process.argv.some((arg) => arg.includes("migrations/run.ts"));
+// Export main database instance
+export const database = createDb();
 
-// Only initialize database/pool if we have the required URL and aren't in a migration script
-// Migration scripts use createDb() directly with admin URLs
-const shouldInitialize = !isMigrationScript && getDatabaseUrl();
+// Export Pool for BetterAuth (HTTP mode, no WebSocket connections)
+export const pool = new Pool({ 
+  connectionString: getDatabaseUrl() 
+});
 
-let _database: Kysely<Database> | undefined;
-export const database: Kysely<Database> = shouldInitialize
-  ? (global.__db__ ?? createDb())
-  : (new Proxy({} as Kysely<Database>, {
-      get(_target, prop) {
-        if (!_database) {
-          _database = global.__db__ ?? createDb();
-          if (process.env.NODE_ENV !== "production") {
-            global.__db__ = _database;
-          }
-        }
-        return (_database as any)[prop];
-      },
-    }) as Kysely<Database>);
-
-if (shouldInitialize && process.env.NODE_ENV !== "production") {
-  global.__db__ = database as Kysely<Database>;
-}
-
-// Export pool for BetterAuth (reuses the same pool as Kysely)
-// Lazy initialization to avoid errors when importing in migration scripts
-let _pool: Pool | undefined;
-export const pool: Pool = shouldInitialize
-  ? getOrCreatePool()
-  : (new Proxy({} as Pool, {
-      get(_target, prop) {
-        if (!_pool) {
-          _pool = getOrCreatePool();
-        }
-        return (_pool as any)[prop];
-      },
-    }) as Pool);
-
+// Export createDb for migrations
 export { createDb };
 export * from "./schema";

@@ -62,16 +62,40 @@ pnpm install
 
 ### Setup
 
-1. **Copy environment variables template:**
+1. **Configure environment variables** for each app:
    ```sh
+   # App (main application)
+   cd apps/app
    cp .env.local.example .env.local
+   # Edit .env.local with your values
+   
+   # Web (marketing site)
+   cd ../web
+   cp .env.local.example .env.local
+   # Edit .env.local with your values
+   
+   # API (API server)
+   cd ../api
+   cp .env.local.example .env.local
+   # Edit .env.local with your values
+   
+   cd ../..
    ```
 
-2. **Configure your environment variables** in `.env.local` at the root:
+2. **Configure database migration credentials** (root `.env.local`):
+   ```sh
+   # Create root .env.local for migrations only
+   cat > .env.local << EOF
+   DATABASE_URL_DEV_ADMIN=postgresql://admin:password@host:5432/dbname
+   DATABASE_URL_PROD_ADMIN=postgresql://admin:password@host:5432/dbname
+   EOF
+   ```
+   
+   Key environment variables to configure:
    - Database URLs (development and production)
    - Better Auth secret (generate with `npx @better-auth/cli secret`)
    - API keys for all service integrations
-   - See [ENV.md](./ENV.md) for complete list
+   - See [env.md](./env.md) for complete list
 
 3. **Run database migrations:**
    ```sh
@@ -116,7 +140,14 @@ Each app is self-contained and independently deployable. Packages are shared acr
 
 ## Environment Variables
 
-All environment variables are configured in a single `.env.local` file at the root of the monorepo. See [ENV.md](./ENV.md) for the complete list of required variables.
+Environment variables are configured per-application following [Turborepo best practices](https://turborepo.ai/docs/crafting-your-repository/using-environment-variables):
+
+- **apps/app/.env.local** - Main application environment variables
+- **apps/web/.env.local** - Marketing website environment variables
+- **apps/api/.env.local** - API server environment variables
+- **Root .env.local** - Database migration admin credentials only
+
+Each app has a `.env.local.example` file showing required variables. See [env.md](./env.md) for detailed documentation.
 
 ## Scripts
 

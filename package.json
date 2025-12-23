@@ -13,14 +13,6 @@
     "boundaries": "turbo boundaries",
     "bump-deps": "npx npm-check-updates --deep -u -x recharts && pnpm install",
     "bump-ui": "npx shadcn@latest add --all --overwrite -c packages/design",
-    "migrate:dev": "pnpm --filter @repo/database migrate:dev",
-    "migrate:dev:up": "pnpm --filter @repo/database migrate:dev:up",
-    "migrate:dev:down": "pnpm --filter @repo/database migrate:dev:down",
-    "migrate:dev:status": "pnpm --filter @repo/database migrate:dev:status",
-    "migrate:prod": "pnpm --filter @repo/database migrate:prod",
-    "migrate:prod:up": "pnpm --filter @repo/database migrate:prod:up",
-    "migrate:prod:down": "pnpm --filter @repo/database migrate:prod:down",
-    "migrate:prod:status": "pnpm --filter @repo/database migrate:prod:status",
     "clean": "git clean -xdf node_modules"
   },
   "devDependencies": {
